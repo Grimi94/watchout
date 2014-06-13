@@ -17,30 +17,64 @@ var updateEnemiesData = function () {
     };
   }
 };
-var update = function(){
-  updateEnemiesData();
 
-  svg.selectAll('circle')
+var playerData = {
+  x: Math.floor(width/2),
+  y: Math.floor(height/2),
+  r: 10,
+  color: 'blue'
+};
+
+var update = function() {
+  updateEnemiesData();
+  svg.selectAll('circle.enemy')
     .data(enemies)
     .transition()
-    .duration(800)
-    .attr('cx', function (d) {
+    .duration(1500)
+    .attr('cx', function(d) {
       return d.x;
     })
-    .attr('cy', function (d) {
+    .attr('cy', function(d) {
       return d.y;
-    })
-    .attr('r', function (d) {
-      return d.r;
     });
 };
 
 
 updateEnemiesData();
-svg.selectAll('circle')
+svg.selectAll('circle.enemy')
   .data(enemies)
   .enter()
-  .append('circle');
+  .append('circle')
+  .attr('class', 'enemy')
+  .attr('r', function(d) {
+    return d.r;
+  });
+
+var drag = d3.behavior.drag()
+  .on('drag', function() {
+    movePlayer(playerData.x + d3.event.dx, playerData.y + d3.event.dy);
+  });
+
+var movePlayer = function (x, y) {
+  playerData.x = x;
+  playerData.y = y;
+  svg.selectAll('circle.player')
+    .data([playerData])
+    .attr('cx', function(d) { return d.x;})
+    .attr('cy', function(d) { return d.y;});
+};
+
+svg.selectAll('circle.player')
+  .data([playerData])
+  .enter()
+  .append('circle')
+  .call(drag)
+  .attr('class', 'player')
+  .attr('r', function(d) { return d.r; })
+  .attr('fill', function(d) { return d.color; });
+
+movePlayer(width/2, height/2);
+
 update();
 
 
