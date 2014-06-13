@@ -6,11 +6,66 @@ var svg = d3.select('body').append('svg')
   .attr('width', width)
   .attr('height', height);
 
-var enemies = [];
+// Player class
+var Player = function(){
+  this.data = {
+    x: Math.floor(width/2),
+    y: Math.floor(height/2),
+    r: 10,
+    color: 'blue'
+  };
+  svg.selectAll('circle.player')
+    .data([this.data])
+    .enter()
+    .append('circle')
+    .call(this.getOnDrag())
+    .attr('class', 'player')
+    .attr('r', function(d) { return d.r; })
+    .attr('fill', function(d) { return d.color; });
+  this.move(width/2, height/2);
+};
 
-var updateEnemiesData = function () {
+Player.prototype.getOnDrag = function() {
+  return d3.behavior.drag()
+  .on('drag', function() {
+    var newX = this.data.x + d3.event.dx;
+    var newY = this.data.y + d3.event.dy;
+    if(0 < newX && newX < width && 0 < newY && newY < height){
+      this.move(newX, newY);
+    }
+  }.bind(this));
+};
+
+Player.prototype.move = function (x, y) {
+  this.data.x = x;
+  this.data.y = y;
+  svg.selectAll('circle.player')
+    .data([this.data])
+    .attr('cx', function(d) { return d.x;})
+    .attr('cy', function(d) { return d.y;});
+};
+
+var player = new Player();
+
+// Enemies: An object of Enemies handles all enemies (black dots).
+var Enemies = function () {
+  this.data = [];
+  this.updateData();
+
+  svg.selectAll('circle.enemy')
+    .data(this.data)
+    .enter()
+    .append('circle')
+    .attr('class', 'enemy')
+    .attr('r', function(d) {
+      return d.r;
+    });
+  this.reposition();
+};
+
+Enemies.prototype.updateData = function () {
   for (var i = 0; i < numEnemies; i++) {
-    enemies[i] = {
+    this.data[i] = {
       x: Math.floor(width*Math.random()),
       y: Math.floor(height*Math.random()),
       r: 10
@@ -18,17 +73,10 @@ var updateEnemiesData = function () {
   }
 };
 
-var playerData = {
-  x: Math.floor(width/2),
-  y: Math.floor(height/2),
-  r: 10,
-  color: 'blue'
-};
-
-var update = function() {
-  updateEnemiesData();
+Enemies.prototype.reposition = function () {
+  this.updateData();
   svg.selectAll('circle.enemy')
-    .data(enemies)
+    .data(this.data)
     .transition()
     .duration(1500)
     .attr('cx', function(d) {
@@ -39,46 +87,9 @@ var update = function() {
     });
 };
 
+var enemies = new Enemies();
 
-updateEnemiesData();
-svg.selectAll('circle.enemy')
-  .data(enemies)
-  .enter()
-  .append('circle')
-  .attr('class', 'enemy')
-  .attr('r', function(d) {
-    return d.r;
-  });
-
-var drag = d3.behavior.drag()
-  .on('drag', function() {
-    movePlayer(playerData.x + d3.event.dx, playerData.y + d3.event.dy);
-  });
-
-var movePlayer = function (x, y) {
-  playerData.x = x;
-  playerData.y = y;
-  svg.selectAll('circle.player')
-    .data([playerData])
-    .attr('cx', function(d) { return d.x;})
-    .attr('cy', function(d) { return d.y;});
-};
-
-svg.selectAll('circle.player')
-  .data([playerData])
-  .enter()
-  .append('circle')
-  .call(drag)
-  .attr('class', 'player')
-  .attr('r', function(d) { return d.r; })
-  .attr('fill', function(d) { return d.color; });
-
-movePlayer(width/2, height/2);
-
-update();
-
-
-setInterval(update, 2000);
+setInterval(enemies.reposition.bind(enemies), 2000);
 
 
 
