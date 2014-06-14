@@ -78,7 +78,25 @@ Enemies.prototype.reposition = function () {
   svg.selectAll('circle.enemy')
     .data(this.data)
     .transition()
-    .duration(1500)
+    .duration(2000)
+    .tween('custom', function() {
+      return function () {
+        var enemy = d3.select(this);
+        var enemyX = enemy.attr('cx');
+        var enemyY = enemy.attr('cy');
+        var enemyR = enemy.attr('r');
+        var localPlayer = d3.selectAll('circle.player');
+        var localPlayerX = localPlayer.attr('cx');
+        var localPlayerY = localPlayer.attr('cy');
+        var localPlayerR = localPlayer.attr('r');
+        var distance = Math.sqrt(Math.pow(enemyY - localPlayerY,2) +
+                                  Math.pow(enemyX - localPlayerX,2));
+
+        if (distance <= (parseInt(enemyR) + parseInt(localPlayerR))) {
+          console.log('Colision!');
+        }
+      }.bind(this);
+    })
     .attr('cx', function(d) {
       return d.x;
     })
@@ -90,7 +108,3 @@ Enemies.prototype.reposition = function () {
 var enemies = new Enemies();
 
 setInterval(enemies.reposition.bind(enemies), 2000);
-
-
-
-
