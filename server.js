@@ -21,7 +21,7 @@ setInterval(function () {
 
 var data = [];
 setInterval(function () {
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < 35; i++) {
     data[i] = {
       x: Math.floor(700*Math.random()),
       y: Math.floor(450*Math.random()),
