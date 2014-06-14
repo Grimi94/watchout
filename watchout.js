@@ -1,10 +1,29 @@
+var socket = io('http://localhost:3141');
+socket.on('news', function (data) {
+  console.log(data);
+  socket.emit('my other event', { my: 'data' });
+});
+
+
 var width = 700;
 var height = 450;
 var numEnemies = 35;
 
-var highScore = 0;
+// var highScore = 0;
 var currentScore = 0;
-var collisions = 0;
+// var collisions = 0;
+
+socket.on('restart', function (data) {
+  console.log('Restart');
+  currentScore = 0;
+  d3.select('.current span').text(currentScore);
+});
+
+socket.on('currentScore', function (data) {
+  currentScore = data.currentScore;
+  console.log(currentScore);
+  d3.select('.current span').text(currentScore);
+});
 
 var svg = d3.select('body').append('svg')
   .attr('width', width)
@@ -98,14 +117,15 @@ Enemies.prototype.reposition = function () {
 
         if (!that.alreadyCollided && distance <= (parseInt(enemyR) + parseInt(localPlayerR))) {
           that.alreadyCollided = true;
-          if (currentScore > highScore) {
-            highScore = currentScore;
-          }
-          d3.select('.high span').text(highScore);
-          currentScore = 0;
-          d3.select('.current span').text(currentScore);
-          collisions++;
-          d3.select('.collisions span').text(collisions);
+          // if (currentScore > highScore) {
+          //   highScore = currentScore;
+          // }
+          // d3.select('.high span').text(highScore);
+          // currentScore = 0;
+          // d3.select('.current span').text(currentScore);
+          // collisions++;
+          // d3.select('.collisions span').text(collisions);
+          socket.emit('restart');
         }
 
         if (t === 1) {
