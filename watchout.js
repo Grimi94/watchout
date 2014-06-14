@@ -24,8 +24,7 @@ var Player = function(){
     .append('circle')
     .call(this.getOnDrag())
     .attr('class', 'player')
-    .attr('r', function(d) { return d.r; })
-    .attr('fill', function(d) { return d.color; });
+    .attr('r', function(d) { return d.r; });
   this.move(width/2, height/2);
 };
 
@@ -56,14 +55,14 @@ var Enemies = function () {
   this.data = [];
   this.updateData();
   this.alreadyCollided = false;
-  svg.selectAll('circle.enemy')
+  svg.selectAll('image.enemy')
     .data(this.data)
     .enter()
-    .append('circle')
-    .attr('class', 'enemy')
-    .attr('r', function(d) {
-      return d.r;
-    });
+    .append('image')
+    .attr('height', 20)
+    .attr('width', 20)
+    .attr('xlink:href', 'icon_20459.svg')
+    .attr('class', 'enemy');
   this.reposition();
 };
 
@@ -80,20 +79,20 @@ Enemies.prototype.updateData = function () {
 Enemies.prototype.reposition = function () {
   var that = this;
   this.updateData();
-  svg.selectAll('circle.enemy')
+  svg.selectAll('image.enemy')
     .data(this.data)
     .transition()
     .duration(2000)
     .tween('custom', function() {
       return function (t) {
         var enemy = d3.select(this);
-        var enemyX = enemy.attr('cx');
-        var enemyY = enemy.attr('cy');
-        var enemyR = enemy.attr('r');
+        var enemyX = enemy.attr('x');
+        var enemyY = enemy.attr('y');
+        var enemyR = 20;
         var localPlayer = d3.selectAll('circle.player');
         var localPlayerX = localPlayer.attr('cx');
         var localPlayerY = localPlayer.attr('cy');
-        var localPlayerR = localPlayer.attr('r');
+        var localPlayerR = 10;
         var distance = Math.sqrt(Math.pow(enemyY - localPlayerY,2) +
                                   Math.pow(enemyX - localPlayerX,2));
 
@@ -115,10 +114,10 @@ Enemies.prototype.reposition = function () {
 
       }.bind(this);
     })
-    .attr('cx', function(d) {
+    .attr('x', function(d) {
       return d.x;
     })
-    .attr('cy', function(d) {
+    .attr('y', function(d) {
       return d.y;
     });
 };
