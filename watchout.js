@@ -2,6 +2,10 @@ var width = 700;
 var height = 450;
 var numEnemies = 35;
 
+var highScore = 0;
+var currentScore = 0;
+var collisions = 0;
+
 var svg = d3.select('body').append('svg')
   .attr('width', width)
   .attr('height', height);
@@ -51,7 +55,7 @@ var player = new Player();
 var Enemies = function () {
   this.data = [];
   this.updateData();
-
+  this.alreadyCollided = false;
   svg.selectAll('circle.enemy')
     .data(this.data)
     .enter()
@@ -74,13 +78,14 @@ Enemies.prototype.updateData = function () {
 };
 
 Enemies.prototype.reposition = function () {
+  var that = this;
   this.updateData();
   svg.selectAll('circle.enemy')
     .data(this.data)
     .transition()
     .duration(2000)
     .tween('custom', function() {
-      return function () {
+      return function (t) {
         var enemy = d3.select(this);
         var enemyX = enemy.attr('cx');
         var enemyY = enemy.attr('cy');
@@ -92,9 +97,22 @@ Enemies.prototype.reposition = function () {
         var distance = Math.sqrt(Math.pow(enemyY - localPlayerY,2) +
                                   Math.pow(enemyX - localPlayerX,2));
 
-        if (distance <= (parseInt(enemyR) + parseInt(localPlayerR))) {
-          console.log('Colision!');
+        if (!that.alreadyCollided && distance <= (parseInt(enemyR) + parseInt(localPlayerR))) {
+          that.alreadyCollided = true;
+          if (currentScore > highScore) {
+            highScore = currentScore;
+          }
+          d3.select('.high span').text(highScore);
+          currentScore = 0;
+          d3.select('.current span').text(currentScore);
+          collisions++;
+          d3.select('.collisions span').text(collisions);
         }
+
+        if (t === 1) {
+          that.alreadyCollided = false;
+        }
+
       }.bind(this);
     })
     .attr('cx', function(d) {
@@ -108,3 +126,8 @@ Enemies.prototype.reposition = function () {
 var enemies = new Enemies();
 
 setInterval(enemies.reposition.bind(enemies), 2000);
+
+setInterval(function () {
+  currentScore++;
+  d3.select('.current span').text(currentScore);
+}, 50);
