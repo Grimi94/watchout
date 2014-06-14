@@ -15,6 +15,9 @@ var currentScore = 0;
 
 socket.on('restart', function (data) {
   console.log('Restart');
+  svg.style('background', 'tomato');
+  svg.transition().delay(100).style('background', 'white');
+
   currentScore = 0;
   d3.select('.current span').text(currentScore);
 });
@@ -125,6 +128,8 @@ Enemies.prototype.reposition = function () {
           // d3.select('.current span').text(currentScore);
           // collisions++;
           // d3.select('.collisions span').text(collisions);
+          // svg.style('background', 'tomato');
+          // svg.transition().delay(100).style('background', 'white');
           socket.emit('restart');
         }
 
