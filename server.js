@@ -18,6 +18,19 @@ setInterval(function () {
   currentScore++;
 }, 50);
 
+
+var data = [];
+setInterval(function () {
+  for (var i = 0; i < 5; i++) {
+    data[i] = {
+      x: Math.floor(700*Math.random()),
+      y: Math.floor(450*Math.random()),
+      r: 10
+    };
+  }
+  io.sockets.emit('updateData', { positions: data });
+}, 2000);
+
 io.on('connection', function (socket) {
   socket.join('collider');
 
@@ -37,5 +50,6 @@ io.on('connection', function (socket) {
       currentScore: currentScore
     });
   }, 500);
+
 
 });

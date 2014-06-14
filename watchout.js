@@ -1,8 +1,4 @@
 var socket = io('http://localhost:3141');
-socket.on('news', function (data) {
-  console.log(data);
-  socket.emit('my other event', { my: 'data' });
-});
 
 
 var width = 700;
@@ -27,6 +23,7 @@ socket.on('currentScore', function (data) {
   console.log(currentScore);
   d3.select('.current span').text(currentScore);
 });
+
 
 var svg = d3.select('body').append('svg')
   .attr('width', width)
@@ -75,32 +72,27 @@ var player = new Player();
 // Enemies: An object of Enemies handles all enemies (black dots).
 var Enemies = function () {
   this.data = [];
-  this.updateData();
+  // this.updateData();
   this.alreadyCollided = false;
-  svg.selectAll('image.enemy')
-    .data(this.data)
-    .enter()
-    .append('image')
-    .attr('height', 20)
-    .attr('width', 20)
-    .attr('xlink:href', 'icon_20459.svg')
-    .attr('class', 'enemy');
   this.reposition();
-};
 
-Enemies.prototype.updateData = function () {
-  for (var i = 0; i < numEnemies; i++) {
-    this.data[i] = {
-      x: Math.floor(width*Math.random()),
-      y: Math.floor(height*Math.random()),
-      r: 10
-    };
-  }
+  socket.on('updateData', function (data) {
+    svg.selectAll('image.enemy')
+      .data(this.data)
+      .enter()
+      .append('image')
+      .attr('height', 20)
+      .attr('width', 20)
+      .attr('xlink:href', 'icon_20459.svg')
+      .attr('class', 'enemy');
+    this.data = data.positions;
+    this.reposition();
+  }.bind(this));
 };
 
 Enemies.prototype.reposition = function () {
   var that = this;
-  this.updateData();
+  // this.updateData();
   svg.selectAll('image.enemy')
     .data(this.data)
     .transition()
@@ -110,7 +102,7 @@ Enemies.prototype.reposition = function () {
         var enemy = d3.select(this);
         var enemyX = enemy.attr('x');
         var enemyY = enemy.attr('y');
-        var enemyR = 20;
+        var enemyR = 10;
         var localPlayer = d3.selectAll('circle.player');
         var localPlayerX = localPlayer.attr('cx');
         var localPlayerY = localPlayer.attr('cy');
@@ -149,7 +141,7 @@ Enemies.prototype.reposition = function () {
 
 var enemies = new Enemies();
 
-setInterval(enemies.reposition.bind(enemies), 2000);
+// setInterval(enemies.reposition.bind(enemies), 2000);
 
 setInterval(function () {
   currentScore++;
